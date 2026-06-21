@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException
+
+
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import re
 
@@ -38,11 +41,11 @@ class ErrorResponse(BaseModel):
 
 MOCK_VEHICLES_DB = {
     "00000000": {
-    "license_plate": "00000000",
-    "manufacturer": "הונדה",
-    "model": "סיוויק",
-    "year": 2017,
-    "color": "לבן",
+        "license_plate": "00000000",
+        "manufacturer": "הונדה",
+        "model": "סיוויק",
+        "year": 2017,
+        "color": "לבן",
     },
     "11111111": {
         "license_plate": "11111111",
@@ -107,7 +110,6 @@ MOCK_VEHICLES_DB = {
         "year": 2017,
         "color": "לבן",
     },
-
 }
 
 
@@ -121,13 +123,11 @@ def is_valid_license_plate(license_plate: str) -> bool:
 
 @app.get("/", tags=["Health"])
 def root():
-    """Health check endpoint"""
     return "Insurance Company Stub API is running"
 
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    """Health check for Cloud Run"""
     return "ok"
 
 
@@ -152,9 +152,9 @@ def get_vehicle_info(request: VehicleRequest):
     license_plate = normalize_license_plate(request.license_plate)
 
     if not is_valid_license_plate(license_plate):
-        raise HTTPException(
+        return JSONResponse(
             status_code=400,
-            detail={
+            content={
                 "success": False,
                 "error": "פורמט מספר רכב לא תקין. יש להזין 7 או 8 ספרות.",
             },
@@ -163,9 +163,9 @@ def get_vehicle_info(request: VehicleRequest):
     vehicle = MOCK_VEHICLES_DB.get(license_plate)
 
     if vehicle is None:
-        raise HTTPException(
+        return JSONResponse(
             status_code=404,
-            detail={
+            content={
                 "success": False,
                 "error": "רכב לא נמצא במאגר.",
             },
