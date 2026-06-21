@@ -141,7 +141,7 @@ def health_check():
         },
         404: {
             "model": ErrorResponse,
-            "description": "רכב לא נמצא במאגר",
+            "description": "רכב יפה מידי ולכן כנראה גנבתם אותו",
         },
     },
     tags=["Vehicle Information"],
