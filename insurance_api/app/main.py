@@ -167,7 +167,7 @@ def get_vehicle_info(request: VehicleRequest):
             status_code=404,
             content={
                 "success": False,
-                "error": "רכב לא נמצא במאגר.",
+                "error": "רכב יפה מידי ולכן כנראה גנבתם אותו.",
             },
         )
 
