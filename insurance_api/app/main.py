@@ -141,7 +141,7 @@ def health_check():
         },
         404: {
             "model": ErrorResponse,
-            "description": "רכב יפה מידי ולכן כנראה גנבתם אותו",
+            "description": "רכב לא נמצא במאגר",
         },
     },
     tags=["Vehicle Information"],
@@ -149,29 +149,39 @@ def health_check():
     description="מחזיר יצרן, דגם, שנה וצבע לפי מספר רכב (7 או 8 ספרות)",
 )
 def get_vehicle_info(request: VehicleRequest):
-    license_plate = normalize_license_plate(request.license_plate)
+    try:
+        license_plate = normalize_license_plate(request.license_plate)
 
-    if not is_valid_license_plate(license_plate):
+        if not is_valid_license_plate(license_plate):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": "פורמט מספר רכב לא תקין. יש להזין 7 או 8 ספרות.",
+                },
+            )
+
+        vehicle = MOCK_VEHICLES_DB.get(license_plate)
+
+        if vehicle is None:
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "success": False,
+                    "error": "רכב לא נמצא במאגר.",
+                },
+            )
+
+        return {
+            "success": True,
+            "data": vehicle,
+        }
+
+    except Exception:
         return JSONResponse(
-            status_code=400,
+            status_code=500,
             content={
                 "success": False,
-                "error": "פורמט מספר רכב לא תקין. יש להזין 7 או 8 ספרות.",
+                "error": "אירעה שגיאה פנימית במערכת.",
             },
         )
-
-    vehicle = MOCK_VEHICLES_DB.get(license_plate)
-
-    if vehicle is None:
-        return JSONResponse(
-            status_code=404,
-            content={
-                "success": False,
-                "error": "רכב יפה מידי ולכן כנראה גנבתם אותו.",
-            },
-        )
-
-    return {
-        "success": True,
-        "data": vehicle,
-    }
